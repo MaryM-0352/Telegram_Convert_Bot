@@ -33,36 +33,48 @@ public class GetFilePDF {
 
         PDDocument pdf_doc = new PDDocument();
         if (Objects.equals(key, "group")){
-            int count = 0;
+            int page_count = 0;
             for (List<String> file: text1){
-                System.out.println("Here we go again");
-                pdf_doc.addPage(new PDPage());
-                PDPage page = pdf_doc.getPage(count);
-                PDPageContentStream stream = new PDPageContentStream(pdf_doc, page);
-                stream.beginText();
-                stream.setFont(PDType1Font.TIMES_ROMAN, 12);
-                stream.setLeading(14.5f);
-                stream.newLineAtOffset(25, 700);
+                int string_count = 0;
+                PDPageContentStream stream = PageCreating.creatingPage(pdf_doc, page_count);
                 for (String s : file) {
-                    stream.showText(s);
-                    stream.newLine();
+                    if (string_count > 43){
+                        stream.endText();
+                        stream.close();
+                        page_count += 1;
+                        stream = PageCreating.creatingPage(pdf_doc, page_count);
+                        stream.showText(s);
+                        stream.newLine();
+                        string_count = 1;
+                    } else {
+                        stream.showText(s);
+                        stream.newLine();
+                        string_count += 1;
+                    }
                 }
                 stream.endText();
                 stream.close();
-                count += 1;
+                page_count += 1;
             }
             name = "text.txt.pdf";
         } else if (text != null){
-            pdf_doc.addPage(new PDPage());
-            PDPage page = pdf_doc.getPage(0);
-            PDPageContentStream stream = new PDPageContentStream(pdf_doc, page);
-            stream.beginText();
-            stream.setFont(PDType1Font.TIMES_ROMAN, 12);
-            stream.setLeading(14.5f);
-            stream.newLineAtOffset(25, 700);
+            int page_count = 0;
+            int string_count = 0;
+            PDPageContentStream stream = PageCreating.creatingPage(pdf_doc, 0);
             for (String s : text) {
-                stream.showText(s);
-                stream.newLine();
+                if (string_count > 43){
+                    stream.endText();
+                    stream.close();
+                    page_count += 1;
+                    stream = PageCreating.creatingPage(pdf_doc, page_count);
+                    stream.showText(s);
+                    stream.newLine();
+                    string_count = 1;
+                } else {
+                    stream.showText(s);
+                    stream.newLine();
+                    string_count += 1;
+                }
             }
             stream.endText();
             stream.close();

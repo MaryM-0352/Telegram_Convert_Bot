@@ -4,7 +4,6 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -64,7 +63,7 @@ public class Bot extends TelegramLongPollingBot {
                 } else if (msg.equals("/finish")){
                     try {
                         String type = message.getDocument().getMimeType();
-                        GetFilePDF.GetFilePDF("empty", "group", group_info, type);
+                        FilePDF.getTextPDF("empty", "group", group_info, type);
                         String chatId = message.getChatId().toString();
                         SendDocFile(chatId, "text.txt");
                         group_info.clear();
@@ -100,9 +99,9 @@ public class Bot extends TelegramLongPollingBot {
                                 group_info.add(info);
                             } else {
                                 var doc = update.getMessage().getDocument();
-                                DownFileDocx.DownFileDocx(file_name, file_id);
+                                UploadFile.uploadFile(file_name, file_id);
                                 String chatId = message.getChatId().toString();
-                                GetFilePDF.GetFilePDF(file_name, null, group_info, doc.getMimeType());
+                                FilePDF.getTextPDF(file_name, null, group_info, doc.getMimeType());
                                 SendDocFile(chatId, file_name);
                             }
                         }
@@ -115,7 +114,7 @@ public class Bot extends TelegramLongPollingBot {
                         var doc = update.getMessage().getPhoto();
                         var photoSize = Photo.getPhoto(update);
                         UploadFile.UploadPhoto("photo", getFilePath(photoSize));
-                        GetPhotoPDF.GetPhotoPDF("photo.jpg");
+                        FilePDF.getPhotoPDF("photo.jpg");
                         SendPhotoFile(chatId,"photo.jpg");
                     } catch (IOException | TelegramApiException e) {
                         throw new RuntimeException(e);

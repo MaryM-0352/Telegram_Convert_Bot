@@ -1,4 +1,4 @@
-package src.main.java;
+package src.main;
 
 import org.telegram.telegrambots.meta.api.objects.Document;
 

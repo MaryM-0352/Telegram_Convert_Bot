@@ -1,4 +1,4 @@
-package src.main.java;
+package src.main;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
@@ -14,8 +14,8 @@ import java.util.*;
 
 //ДЕЛА НАСУЩНЫЕ: скачать картинку в норм форме(чтобы читалось)
 public class Bot extends TelegramLongPollingBot {
-    final static public String BOT_TOKEN = Info.token();
-    final private String BOT_NAME = Info.name();
+    final static public String BOT_TOKEN = Info.getToken();
+    final private String BOT_NAME = Info.getName();
 
     @Override
     public String getBotUsername() {
@@ -63,7 +63,6 @@ public class Bot extends TelegramLongPollingBot {
                 assert message != null;
                 if (message.hasDocument() && message.getDocument() != null) {
                     try {
-
                         if (!group_info.isEmpty()){
                             SendMsg(message, "Please send '/finish' when you're finished sending a group of files." +
                                                 "If you want to add to group one file, send '/only_one'");
@@ -73,20 +72,26 @@ public class Bot extends TelegramLongPollingBot {
                         final String file_id = message.getDocument().getFileId();
                         int id = message.getMessageId();
                         System.out.println(current_id);
-                        if (id == current_id + 1){
-                            groupId = "group";
-                        }
-                        if (groupId != null){
-                            String[] info = new String[2];
-                            info[0] = file_name; info[1] = file_id;
-                            group_info.add(info);
-                        }
-                        else {
-                            var doc = update.getMessage().getDocument();
-                            DownFileDocx.DownFileDocx(file_name, file_id);
-                            String chatId = message.getChatId().toString();
-                            GetFilePDF.GetFilePDF(file_name, null, group_info);
-                            SendDocFile(chatId, file_name);
+                        if (Objects.equals(message.getDocument().getMimeType(), "text/html")){
+                            System.out.println("how it can be");
+                            HTML.convertHTMLToPDF(file_name);
+                            System.out.println("save?");
+                        } else {
+                            if (id == current_id + 1) {
+                                groupId = "group";
+                            }
+                            if (groupId != null) {
+                                String[] info = new String[2];
+                                info[0] = file_name;
+                                info[1] = file_id;
+                                group_info.add(info);
+                            } else {
+                                var doc = update.getMessage().getDocument();
+                                DownFileDocx.DownFileDocx(file_name, file_id);
+                                String chatId = message.getChatId().toString();
+                                GetFilePDF.GetFilePDF(file_name, null, group_info);
+                                SendDocFile(chatId, file_name);
+                            }
                         }
                     } catch (IOException | TelegramApiException e) {
                         throw new RuntimeException(e);

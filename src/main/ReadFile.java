@@ -16,7 +16,7 @@ import java.util.List;
 
 public class ReadFile {
     public static List<String> ReadTXTFile(String filename) throws IOException {
-        Path content_path = Paths.get("C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot1" +
+        Path content_path = Paths.get("C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot2" +
                                            "\\src\\main\\resources\\upl_files\\", filename);
         BufferedReader reader = Files.newBufferedReader(content_path);
         String result = "";
@@ -38,28 +38,30 @@ public class ReadFile {
                 }
             };
             result1.add(k, result);
+            return result1;
         } catch (IOException e){
-            return null;
+            e.printStackTrace();
         }
-        return result1;
+        return null;
     }
 
-    public static String ReadDOCXFile(Document document) {
-        StringBuilder text = new StringBuilder();
+    public static List<String> ReadDOCXFile(String filename) {
+        List<String> text = new ArrayList<>();
         try {
-            File file = new File("C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot1\\src\\main\\resources\\upl_files\\" + document.getFileName());
+            File file = new File("C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot2\\" +
+                                          "src\\main\\resources\\upl_files\\" + filename);
+
             FileInputStream fis = new FileInputStream(file.getAbsolutePath());
-            XWPFDocument document1 = new XWPFDocument(fis);
-            List<XWPFParagraph> paragraphs = document1.getParagraphs();
+            XWPFDocument document = new XWPFDocument(fis);
+            List<XWPFParagraph> paragraphs = document.getParagraphs();
             for (XWPFParagraph para : paragraphs) {
-                System.out.println(para.getText());
-                text.append(para.getText());
+                text.add(para.getText());
             }
             fis.close();
+            return text;
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return text.toString();
+        return null;
     }
 }

@@ -15,9 +15,10 @@ public class GetPhotoPDF {
         PDDocument pdf_doc = new PDDocument();
         pdf_doc.addPage(new PDPage());
         PDPage page = pdf_doc.getPage(0);
-
-        PDImageXObject pdImage = PDImageXObject.createFromFile("/str/main/resources/upl_files/" + file_name,pdf_doc);
-
+        System.out.println("Page is created");
+        String imagePath = "C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot2\\src\\main\\resources\\upl_files\\" + file_name;
+        PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath,pdf_doc);
+        System.out.println("Page is created2");
         PDPageContentStream contents = new PDPageContentStream(pdf_doc, page);
 
         contents.drawImage(pdImage, 70, 250);
@@ -28,7 +29,7 @@ public class GetPhotoPDF {
         contents.close();
 
         //Saving the document
-        pdf_doc.save("C:/PdfBox_Examples/sample.pdf");
+        pdf_doc.save(file_name + ".pdf");
 
         //Closing the document
         pdf_doc.close();

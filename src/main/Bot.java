@@ -1,6 +1,7 @@
 package src.main;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -12,11 +13,22 @@ import java.io.File;
 import java.util.*;
 
 
-//ДЕЛА НАСУЩНЫЕ: скачать картинку в норм форме(чтобы читалось)
 public class Bot extends TelegramLongPollingBot {
     final static public String BOT_TOKEN = Info.getToken();
     final private String BOT_NAME = Info.getName();
 
+    public String getFilePath(PhotoSize photo){
+        Objects.requireNonNull(photo);
+        GetFile getFileMethod = new GetFile();
+        getFileMethod.setFileId(photo.getFileId());
+        try {
+            org.telegram.telegrambots.meta.api.objects.File file = execute(getFileMethod);
+            return file.getFilePath();
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     @Override
     public String getBotUsername() {
         return BOT_NAME;
@@ -51,7 +63,8 @@ public class Bot extends TelegramLongPollingBot {
                     current_id = message.getMessageId();
                 } else if (msg.equals("/finish")){
                     try {
-                        GetFilePDF.GetFilePDF("empty", "group", group_info);
+                        String type = message.getDocument().getMimeType();
+                        GetFilePDF.GetFilePDF("empty", "group", group_info, type);
                         String chatId = message.getChatId().toString();
                         SendDocFile(chatId, "text.txt");
                         group_info.clear();
@@ -89,7 +102,7 @@ public class Bot extends TelegramLongPollingBot {
                                 var doc = update.getMessage().getDocument();
                                 DownFileDocx.DownFileDocx(file_name, file_id);
                                 String chatId = message.getChatId().toString();
-                                GetFilePDF.GetFilePDF(file_name, null, group_info);
+                                GetFilePDF.GetFilePDF(file_name, null, group_info, doc.getMimeType());
                                 SendDocFile(chatId, file_name);
                             }
                         }
@@ -98,13 +111,12 @@ public class Bot extends TelegramLongPollingBot {
                     }
                 } else if (message.hasPhoto()) {
                     try {
-                        String chat_id = update.getMessage().getChatId().toString();
+                        String chatId = update.getMessage().getChatId().toString();
                         var doc = update.getMessage().getPhoto();
-                        DownFilePhoto.DownFilePhoto(doc);
-                        final String fileId = doc.get(0).getFileId();
-                        GetPhotoPDF.GetPhotoPDF(fileId);
-                        SendDocFile(chat_id, "empty");
-                        //GetFilePDF.GetFilePDF(doc);
+                        var photoSize = Photo.getPhoto(update);
+                        UploadFile.UploadPhoto("photo", getFilePath(photoSize));
+                        GetPhotoPDF.GetPhotoPDF("photo.jpg");
+                        SendPhotoFile(chatId,"photo.jpg");
                     } catch (IOException | TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
@@ -120,6 +132,16 @@ public class Bot extends TelegramLongPollingBot {
         sendDocumentRequest.setChatId(chatId);
         sendDocumentRequest.setDocument(new InputFile(name));
         sendDocumentRequest.setCaption("Document");
+        execute(sendDocumentRequest);
+    }
+
+    public void SendPhotoFile(String chatId, String filename) throws IOException, TelegramApiException {
+        System.out.print("It is SendFunction");
+        SendDocument sendDocumentRequest = new SendDocument();
+        File name = new File(filename + ".pdf");
+        sendDocumentRequest.setChatId(chatId);
+        sendDocumentRequest.setDocument(new InputFile(name));
+        sendDocumentRequest.setCaption("Photo");
         execute(sendDocumentRequest);
     }
 

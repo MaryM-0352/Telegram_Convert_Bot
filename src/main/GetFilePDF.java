@@ -14,13 +14,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class GetFilePDF {
-    public static Long GetFilePDF(String file_name, String key, List<String[]> dictionary) throws IOException {
+    public static Long GetFilePDF(String file_name, String key, List<String[]> dictionary, String type) throws IOException {
         List<String> text = new ArrayList<>();
         List<List<String>> text1 = new ArrayList<>();
         if (key == null){
-            if (ReadFile.ReadTXTFile(file_name) == null){
-                System.out.println(' ');
-                //text = ReadFile.ReadDOCXFile(document);
+            if (Objects.equals(type, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")){
+                text = ReadFile.ReadDOCXFile(file_name);
             }
             else{
                 text = ReadFile.ReadTXTFile(file_name);

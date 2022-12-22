@@ -13,8 +13,9 @@ import java.util.*;
 
 
 public class Bot extends TelegramLongPollingBot {
-    final static public String BOT_TOKEN = Info.getToken();
-    final private String BOT_NAME = Info.getName();
+    final protected static String BOT_TOKEN = Info.getToken();
+
+    final protected String BOT_NAME = Info.getName();
 
     public String getFilePath(PhotoSize photo){
         Objects.requireNonNull(photo);
@@ -40,6 +41,7 @@ public class Bot extends TelegramLongPollingBot {
 
     List<String[]> group_info = new ArrayList<>();
     int current_id = -10;
+    String type;
     @Override
     public void onUpdateReceived(Update update) {
         //handle messages -> we look for the message we recieved
@@ -62,7 +64,6 @@ public class Bot extends TelegramLongPollingBot {
                     current_id = message.getMessageId();
                 } else if (msg.equals("/finish")){
                     try {
-                        String type = message.getDocument().getMimeType();
                         FilePDF.getTextPDF("empty", "group", group_info, type);
                         String chatId = message.getChatId().toString();
                         SendDocFile(chatId, "text.txt");
@@ -75,6 +76,7 @@ public class Bot extends TelegramLongPollingBot {
                 assert message != null;
                 if (message.hasDocument() && message.getDocument() != null) {
                     try {
+                        type = message.getDocument().getMimeType();
                         if (!group_info.isEmpty()){
                             SendMsg(message, "Please send '/finish' when you're finished sending a group of files." +
                                                 "If you want to add to group one file, send '/only_one'");

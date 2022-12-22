@@ -12,6 +12,27 @@ import java.util.List;
 import java.util.Objects;
 
 public class FilePDF {
+
+    public static Integer writeText(List<String> file, PDPageContentStream stream,
+                                 int page_count, PDDocument pdf_doc) throws IOException {
+        int string_count = 0;
+        for (String s : file) {
+            if (string_count > 43){
+                stream.endText();
+                stream.close();
+                page_count += 1;
+                stream = PageCreating.creatingPage(pdf_doc, page_count);
+                stream.showText(s);
+                stream.newLine();
+                string_count = 1;
+            } else {
+                stream.showText(s);
+                stream.newLine();
+                string_count += 1;
+            }
+        }
+        return page_count;
+    }
     public static Long getTextPDF(String file_name, String key, List<String[]> dictionary, String type) throws IOException {
         List<String> text = new ArrayList<>();
         List<List<String>> text1 = new ArrayList<>();
@@ -32,47 +53,19 @@ public class FilePDF {
         if (Objects.equals(key, "group")){
             int page_count = 0;
             for (List<String> file: text1){
-                int string_count = 0;
                 PDPageContentStream stream = PageCreating.creatingPage(pdf_doc, page_count);
-                for (String s : file) {
-                    if (string_count > 43){
-                        stream.endText();
-                        stream.close();
-                        page_count += 1;
-                        stream = PageCreating.creatingPage(pdf_doc, page_count);
-                        stream.showText(s);
-                        stream.newLine();
-                        string_count = 1;
-                    } else {
-                        stream.showText(s);
-                        stream.newLine();
-                        string_count += 1;
-                    }
-                }
+                page_count = writeText(file, stream, page_count, pdf_doc);
                 stream.endText();
                 stream.close();
                 page_count += 1;
+                System.out.println(page_count);
             }
             name = "text.txt.pdf";
         } else if (text != null){
             int page_count = 0;
             int string_count = 0;
             PDPageContentStream stream = PageCreating.creatingPage(pdf_doc, 0);
-            for (String s : text) {
-                if (string_count > 43){
-                    stream.endText();
-                    stream.close();
-                    page_count += 1;
-                    stream = PageCreating.creatingPage(pdf_doc, page_count);
-                    stream.showText(s);
-                    stream.newLine();
-                    string_count = 1;
-                } else {
-                    stream.showText(s);
-                    stream.newLine();
-                    string_count += 1;
-                }
-            }
+            writeText(text,stream, page_count, pdf_doc);
             stream.endText();
             stream.close();
             name = file_name + ".pdf";

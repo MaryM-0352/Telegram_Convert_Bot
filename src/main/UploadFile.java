@@ -8,7 +8,7 @@ import java.net.URL;
 
 public class UploadFile {
     public static void uploadFile(String file_name, String file_id) throws IOException {
-        System.out.println(file_id);
+        System.out.println(file_name);
         URL url = new URL("https://api.telegram.org/bot"+Bot.BOT_TOKEN+"/getFile?file_id="+file_id);
 
         BufferedReader in = new BufferedReader(new InputStreamReader( url.openStream()));

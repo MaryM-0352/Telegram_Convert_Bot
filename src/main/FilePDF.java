@@ -129,21 +129,51 @@ public class FilePDF {
         return pdf_doc.getDocumentId();
     }
 
-    public static void getPhotoPDF(String file_name) throws IOException {
+    public static void getPhotoPDF(List<String> names, String file_name, String key) throws IOException {
         PDDocument pdf_doc = new PDDocument();
-        pdf_doc.addPage(new PDPage());
-        PDPage page = pdf_doc.getPage(0);
-        String imagePath = "C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot2\\src\\main\\resources\\upl_files\\" + file_name;
-        PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath,pdf_doc);
-        PDPageContentStream contents = new PDPageContentStream(pdf_doc, page);
+        if (Objects.equals(key, "group")){
+            int i = 0;
+            for (String name: names){
+                System.out.println(name);
+                pdf_doc.addPage(new PDPage());
+                PDPage page = pdf_doc.getPage(i);
+                String imagePath = "C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot2\\src\\main\\resources\\upl_files\\" + name;
+                int wigth; int heigth;
+                if(Photo.resizeFile(imagePath, name)){
+                    wigth = 0;
+                    heigth = 0;
+                } else {
+                    wigth = 70;
+                    heigth = 200;
+                }
+                PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath,pdf_doc);
+                System.out.println("it is ok");
+                PDPageContentStream contents = new PDPageContentStream(pdf_doc, page);
 
-        contents.drawImage(pdImage, 70, 250);
+                contents.drawImage(pdImage, wigth, heigth);
 
-        System.out.println("Image inserted");
+                System.out.println("Image inserted");
 
-        contents.close();
-        pdf_doc.save(file_name + ".pdf");
-        pdf_doc.close();
+                contents.close();
+                i += 1;
+            }
+            pdf_doc.save("photos" + ".pdf");
+            pdf_doc.close();
+        } else {
+            pdf_doc.addPage(new PDPage());
+            PDPage page = pdf_doc.getPage(0);
+            String imagePath = "C:\\Users\\Maria\\IdeaProjects\\Telegram_Convert_Bot2\\src\\main\\resources\\upl_files\\" + file_name;
+            PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath, pdf_doc);
+            PDPageContentStream contents = new PDPageContentStream(pdf_doc, page);
+
+            contents.drawImage(pdImage, 70, 250);
+
+            System.out.println("Image inserted");
+
+            contents.close();
+            pdf_doc.save(file_name + ".pdf");
+            pdf_doc.close();
+        }
     }
 
 }

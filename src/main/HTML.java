@@ -11,6 +11,15 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class HTML {
+    public static void convertURLToPDF(String url){
+        String fileName = "WebToPdf.pdf";
+        //Specify the plugin path
+        String pluginPath = "C:\\plugins";
+        //Set plugin path
+        HtmlConverter.setPluginPath(pluginPath);
+        //Convert URL to PDF
+        HtmlConverter.convert(url, fileName, true, 1000000, new Size(1200f, 1000f), new PdfMargins(0));
+    }
     public static void convertHTMLToPDF(String filename) throws IOException {
         String HTMLPath = "C:/Users/Maria/IdeaProjects/Telegram_Convert_Bot2/src/main/resources/upl_files/" + filename;
         System.out.println(HTMLPath);

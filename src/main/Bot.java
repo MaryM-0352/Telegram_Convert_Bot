@@ -30,6 +30,17 @@ public class Bot extends TelegramLongPollingBot {
         }
         return null;
     }
+
+    public List<String> collectPhoto(List<PhotoSize> list) throws IOException {
+        List<String> names = new ArrayList<>();
+        int i = 0;
+        for (PhotoSize photo: list){
+            i++;
+            UploadFile.UploadPhoto("photo" + i, getFilePath(photo));
+            names.add("photo" + i + ".jpg");
+        }
+        return names;
+    }
     @Override
     public String getBotUsername() {
         return BOT_NAME;
@@ -41,7 +52,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     List<String[]> group_info = new ArrayList<>();
-    List<Photo> photoInfo = new ArrayList<>();
+    List<PhotoSize> photoInfo = new ArrayList<>();
     int current_id = -10;
     String type;
     @Override
@@ -56,6 +67,27 @@ public class Bot extends TelegramLongPollingBot {
             message = update.getMessage();
             System.out.println(message);
             if (message != null && message.hasText()) {
+                System.out.println("It is a text");
+                if (message.getText().startsWith("https://")){
+                    System.out.println("start");
+                    String url = message.getText();
+                    HTML.convertURLToPDF(url);
+                    File file = new File("WebToPdf" + ".pdf");
+                    while (!file.exists()){
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    String chatId = message.getChatId().toString();
+                    try {
+                        SendDocFile(chatId, "WebToPdf");
+                    } catch (IOException | TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
                 String msg = message.getText().toLowerCase();
 
                 if (msg.startsWith("/hello")) {
@@ -65,13 +97,23 @@ public class Bot extends TelegramLongPollingBot {
                 } else if (msg.equals("/only_one")){
                     current_id = message.getMessageId();
                 } else if (msg.equals("/finish")){
-                    try {
-                        FilePDF.getTextPDF("empty", "group", group_info, type);
-                        String chatId = message.getChatId().toString();
-                        SendDocFile(chatId, "text.txt");
-                        group_info.clear();
-                    } catch (IOException | TelegramApiException e) {
-                        throw new RuntimeException(e);
+                    String chatId = message.getChatId().toString();
+                    if (!group_info.isEmpty()) {
+                        try {
+                            FilePDF.getTextPDF("empty", "group", group_info, type);
+                            SendDocFile(chatId, "text.txt");
+                            group_info.clear();
+                        } catch (IOException | TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else if (!photoInfo.isEmpty()){
+                        try {
+                            FilePDF.getPhotoPDF(collectPhoto(photoInfo), null, "group");
+                            SendPhotoFile(chatId, "photos");
+                            photoInfo.clear();
+                        } catch (IOException | TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             } else {
@@ -120,24 +162,27 @@ public class Bot extends TelegramLongPollingBot {
                 } else if (message.hasPhoto()) {
                     int id = message.getMessageId();
                     var groupId = update.getMessage().getMediaGroupId();
+                    if (!photoInfo.isEmpty()){
+                        SendMsg(message, "Please send '/finish' when you're finished sending a group of files.");
+                    }
+                    System.out.println(groupId);
                     if (id == current_id + 1) {
                         groupId = "group";
                     }
                     if (groupId != null) {
-                        String[] info = new String[2];
-                        //info[0] = file_name;
-                        //info[1] = file_id;
-                        group_info.add(info);
-                    }
-                    try {
-                        String chatId = update.getMessage().getChatId().toString();
-                        var doc = update.getMessage().getPhoto();
                         var photoSize = Photo.getPhoto(update);
-                        UploadFile.UploadPhoto("photo", getFilePath(photoSize));
-                        FilePDF.getPhotoPDF("photo.jpg");
-                        SendPhotoFile(chatId,"photo.jpg");
-                    } catch (IOException | TelegramApiException e) {
-                        throw new RuntimeException(e);
+                        photoInfo.add(photoSize);
+                        System.out.println(photoInfo.size());
+                    } else {
+                        try {
+                            String chatId = update.getMessage().getChatId().toString();
+                            var photoSize = Photo.getPhoto(update);
+                            UploadFile.UploadPhoto("photo", getFilePath(photoSize));
+                            FilePDF.getPhotoPDF(null, "photo.jpg", null);
+                            SendPhotoFile(chatId, "photo.jpg");
+                        } catch (IOException | TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }

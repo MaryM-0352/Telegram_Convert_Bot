@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.*;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class Bot extends TelegramLongPollingBot {
@@ -40,6 +41,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     List<String[]> group_info = new ArrayList<>();
+    List<Photo> photoInfo = new ArrayList<>();
     int current_id = -10;
     String type;
     @Override
@@ -85,11 +87,17 @@ public class Bot extends TelegramLongPollingBot {
                         final String file_name = message.getDocument().getFileName();
                         final String file_id = message.getDocument().getFileId();
                         int id = message.getMessageId();
+                        String chatId = message.getChatId().toString();
                         System.out.println(current_id);
                         if (Objects.equals(message.getDocument().getMimeType(), "text/html")){
-                            System.out.println("how it can be");
+                            UploadFile.uploadFile(file_name, file_id);
+                            String PDFName = file_name.split("\\.")[0];
                             HTML.convertHTMLToPDF(file_name);
-                            System.out.println("save?");
+                            File file = new File(PDFName + ".pdf");
+                            while (!file.exists()){
+                                TimeUnit.SECONDS.sleep(1);
+                            }
+                            SendDocFile(chatId, PDFName);
                         } else {
                             if (id == current_id + 1) {
                                 groupId = "group";
@@ -102,15 +110,25 @@ public class Bot extends TelegramLongPollingBot {
                             } else {
                                 var doc = update.getMessage().getDocument();
                                 UploadFile.uploadFile(file_name, file_id);
-                                String chatId = message.getChatId().toString();
                                 FilePDF.getTextPDF(file_name, null, group_info, doc.getMimeType());
                                 SendDocFile(chatId, file_name);
                             }
                         }
-                    } catch (IOException | TelegramApiException e) {
+                    } catch (IOException | TelegramApiException | InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 } else if (message.hasPhoto()) {
+                    int id = message.getMessageId();
+                    var groupId = update.getMessage().getMediaGroupId();
+                    if (id == current_id + 1) {
+                        groupId = "group";
+                    }
+                    if (groupId != null) {
+                        String[] info = new String[2];
+                        //info[0] = file_name;
+                        //info[1] = file_id;
+                        group_info.add(info);
+                    }
                     try {
                         String chatId = update.getMessage().getChatId().toString();
                         var doc = update.getMessage().getPhoto();

@@ -94,7 +94,7 @@ public class FilePDF {
             text = prepareText(text);
         }
         else {
-            text1 = CollectGroup.collectGroup(dictionary);
+            text1 = CollectGroup.collectFileGroup(dictionary);
 
             for (List<String> list: text1){
                 list = prepareText(list);

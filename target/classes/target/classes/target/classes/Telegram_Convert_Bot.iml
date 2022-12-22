@@ -70,5 +70,6 @@
     <orderEntry type="library" name="Maven: org.apache.pdfbox:fontbox:2.0.4" level="project" />
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.pdfbox:xmpbox:2.0.13" level="project" />
+    <orderEntry type="library" name="Maven: e-iceblue:spire.pdf:8.11.8" level="project" />
   </component>
 </module>

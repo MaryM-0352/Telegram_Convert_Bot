@@ -12,10 +12,12 @@ import java.io.IOException;
 
 public class HTML {
     public static void convertHTMLToPDF(String filename) throws IOException {
-        String htmlString = HtmlToString("C:\\Users\\Maria\\Desktop\\test.html");
+        String HTMLPath = "C:/Users/Maria/IdeaProjects/Telegram_Convert_Bot2/src/main/resources/upl_files/" + filename;
+        System.out.println(HTMLPath);
+        String htmlString = HtmlToString(HTMLPath);
         System.out.println("we are here");
         //Specify the output file path
-        String outputFile = "C:\\Users\\Maria\\HtmlToPdf.pdf";
+        String outputFile = filename.split("\\.")[0] + ".pdf";
         //Specify the plugin path
         String pluginPath = "C:\\plugins";
         //Set plugin path
